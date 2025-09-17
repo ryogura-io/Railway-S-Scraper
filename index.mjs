@@ -12,13 +12,11 @@ const COLLECTION_NAME = "cards";
 const DATA_FILE = "cards.json"; 
 const TIERS = [6,'S'];
 const PAGE_RANGES = {
-  // 1: [1, 2], 
-  // 5: [1, 135], 
-  6: [1, 34], // scrape pages 1 → 30 of tier 2
+  6: [1, 34], 
   'S': [1, 7]
 };
 
-let db, cardsCollection, browser;
+let db, cardsCollection;
 
 // --- MongoDB Setup ---
 async function connectMongo() {
@@ -29,9 +27,9 @@ async function connectMongo() {
   console.log("✅ Connected to MongoDB Atlas");
 }
 
-// --- Setup Puppeteer ---
+// --- Launch Puppeteer ---
 async function initBrowser() {
-  browser = await puppeteer.launch({
+  const browser = await puppeteer.launch({
     headless: true,
     args: [
       "--no-sandbox",
@@ -43,10 +41,11 @@ async function initBrowser() {
     ]
   });
   console.log("✅ Headless Chrome started");
+  return browser;
 }
 
 // --- Scrape a page HTML ---
-async function fetchHtml(url) {
+async function fetchHtml(browser, url) {
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
   const html = await page.content();
@@ -55,17 +54,25 @@ async function fetchHtml(url) {
 }
 
 // --- Scrape a single card page ---
-async function scrapeCardPage(url) {
+async function scrapeCardPage(browser, url, tier) {
   try {
-    const html = await fetchHtml(url);
+    const html = await fetchHtml(browser, url);
     const $ = cheerio.load(html);
+
+    // img vs video condition
+    let img;
+    if (tier === 6 || tier === "S") {
+      img = $(".cardData video.img-fluid").attr("src") || null;
+    } else {
+      img = $(".cardData img.img-fluid").attr("src") || null;
+    }
 
     const card = {
       url,
       name: $("ol.breadcrumb-new li:last-child span[itemprop='name']").text()?.trim() || null,
       tier: $("ol.breadcrumb-new li:nth-child(3) span[itemprop='name']").text()?.trim() || null,
       series: $("ol.breadcrumb-new li:nth-child(4) span[itemprop='name']").text()?.trim() || null,
-      img: $(".cardData img.img-fluid").attr("src") || null,
+      img,
       maker: $("p:has(span.padr5)").text()?.replace("Card Maker:", "").trim() || null,
     };
 
@@ -99,8 +106,10 @@ async function scrapeAllPages(existingUrls) {
       const pageUrl = `https://shoob.gg/cards?page=${i}&tier=${tier}`;
       console.log(`🔹 Scraping index: ${pageUrl}`);
 
+      let browser;
       try {
-        const html = await fetchHtml(pageUrl);
+        browser = await initBrowser(); // restart browser for each index page
+        const html = await fetchHtml(browser, pageUrl);
         const $ = cheerio.load(html);
 
         const cardLinks = [
@@ -113,7 +122,7 @@ async function scrapeAllPages(existingUrls) {
 
         for (const link of cardLinks) {
           if (!existingUrls.has(link)) {
-            const card = await scrapeCardPage(link);
+            const card = await scrapeCardPage(browser, link, tier);
             if (card) {
               newCards.push(card);
               existingUrls.add(link);
@@ -123,6 +132,8 @@ async function scrapeAllPages(existingUrls) {
         }
       } catch (err) {
         console.log(`⚠️ Failed index page ${pageUrl}: ${err.message}`);
+      } finally {
+        if (browser) await browser.close(); // close after each page
       }
 
       await new Promise((r) => setTimeout(r, 2000));
@@ -153,9 +164,5 @@ app.get("/", (req, res) => {
 app.listen(PORT, "0.0.0.0", async () => {
   console.log(`✅ Keep-alive server running on port ${PORT}`);
   await connectMongo();
-  await initBrowser();
   await runScraper();
-  await browser.close();
 });
-
-
