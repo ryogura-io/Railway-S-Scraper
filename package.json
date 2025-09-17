@@ -1,0 +1,19 @@
+{
+  "name": "shoob-scraper",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "express": "^4.19.2",
+    "fs": "0.0.1-security",
+    "mongodb": "^6.8.0",
+    "puppeteer": "^23.6.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
