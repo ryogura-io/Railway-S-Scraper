@@ -44,17 +44,28 @@ async function initBrowser() {
 }
 
 // --- Scrape a page HTML ---
+// --- Scrape a page HTML ---
 async function fetchHtml(url, waitSelector = null) {
   const page = await browser.newPage();
-  await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
+  try {
+    await page.goto(url, {
+      waitUntil: ["domcontentloaded", "networkidle2"],
+      timeout: 60000,
+    });
 
-  if (waitSelector) {
-    await page.waitForSelector(waitSelector, { timeout: 60000 });
+    if (waitSelector) {
+      await page.waitForSelector(waitSelector, { timeout: 60000 });
+    }
+
+    const html = await page.content();
+    return html;
+  } catch (err) {
+    console.log(`⚠️ fetchHtml failed for ${url}: ${err.message}`);
+    return null;
+  } finally {
+    await page.close();
+    await new Promise(r => setTimeout(r, 1500)); // give Chrome breathing space
   }
-
-  const html = await page.content();
-  await page.close();
-  return html;
 }
 
 // --- Scrape a single card page ---
@@ -111,6 +122,10 @@ async function scrapeAllPages(existingUrls) {
 
       try {
         const html = await fetchHtml(pageUrl, "a[href^='/cards/info/']");
+        if (!html) {
+  console.log(`⚠️ Skipping ${pageUrl} (no HTML)`);
+  continue;
+}
         const $ = cheerio.load(html);
 
         const cardLinks = [
@@ -167,3 +182,4 @@ app.listen(PORT, "0.0.0.0", async () => {
   await runScraper();
   await browser.close();
 });
+
