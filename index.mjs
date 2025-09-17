@@ -7,11 +7,16 @@ import { MongoClient } from "mongodb";
 
 // --- CONFIG ---
 const MONGO_URI = "mongodb+srv://Ryou:12345@shoob-cards.6bphku9.mongodb.net/?retryWrites=true&w=majority&appName=Shoob-Cards";
-const DB_NAME = "shoob";
-const COLLECTION_NAME = "cards-backup";
+const DB_NAME = "cards-backup";
+const COLLECTION_NAME = "cards";
 const DATA_FILE = "cards.json"; 
-const TIERS = [2];
-const PAGE_RANGES = { 2: [1, 2] }; // test small range first
+const TIERS = [1,5,6,'S'];
+const PAGE_RANGES = {
+  1: [1, 2], 
+  // 5: [1, 135], 
+  // 6: [1, 34], // scrape pages 1 → 30 of tier 2
+  // 'S': [1, 7]
+};
 
 let db, cardsCollection, browser;
 
@@ -152,3 +157,4 @@ app.listen(PORT, "0.0.0.0", async () => {
   await runScraper();
   await browser.close();
 });
+
