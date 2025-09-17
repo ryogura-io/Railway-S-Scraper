@@ -45,7 +45,7 @@ async function initBrowser() {
 }
 
 // --- Scrape a page HTML ---
-async function fetchHtml(url, waitSelector = null) {
+async function fetchHtml(browser, url, waitSelector = null) {
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
 
@@ -61,7 +61,7 @@ async function fetchHtml(url, waitSelector = null) {
 // --- Scrape a single card page ---
 async function scrapeCardPage(browser, url, tier, attempt = 1) {
   try {
-    const html = await fetchHtml(url, ".cardData img.img-fluid, .cardData video.img-fluid");
+    const html = await fetchHtml(browser, url, ".cardData img.img-fluid, .cardData video.img-fluid");
     const $ = cheerio.load(html);
 
     // img vs video condition
@@ -122,7 +122,7 @@ async function scrapeAllPages(existingUrls) {
       let browser;
       try {
         browser = await initBrowser(); // restart browser for each index page
-        const html = await fetchHtml(pageUrl, "a[href^='/cards/info/']");
+        const html = await fetchHtml(browser, pageUrl, "a[href^='/cards/info/']");
         const $ = cheerio.load(html);
 
         const cardLinks = [
@@ -179,5 +179,6 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
 
 
