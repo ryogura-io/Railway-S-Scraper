@@ -54,7 +54,7 @@ async function fetchHtml(browser, url) {
 }
 
 // --- Scrape a single card page ---
-async function scrapeCardPage(browser, url, tier) {
+async function scrapeCardPage(browser, url, tier, attempt = 1) {
   try {
     const html = await fetchHtml(browser, url);
     const $ = cheerio.load(html);
@@ -91,7 +91,15 @@ async function scrapeCardPage(browser, url, tier) {
 
     return card;
   } catch (err) {
-    console.log(`❌ Failed scraping ${url}: ${err.message}`);
+    if (attempt < 3) {
+      console.log(`🔁 Retry ${attempt} for ${url} due to error: ${err.message}`);
+      // restart browser and try again
+      const newBrowser = await initBrowser();
+      const result = await scrapeCardPage(newBrowser, url, tier, attempt + 1);
+      await newBrowser.close();
+      return result;
+    }
+    console.log(`❌ Failed scraping ${url} after 3 attempts: ${err.message}`);
     return null;
   }
 }
@@ -166,3 +174,4 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
