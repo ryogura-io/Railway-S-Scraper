@@ -45,9 +45,14 @@ async function initBrowser() {
 }
 
 // --- Scrape a page HTML ---
-async function fetchHtml(browser, url) {
+async function fetchHtml(url, waitSelector = null) {
   const page = await browser.newPage();
-  await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
+
+  if (waitSelector) {
+    await page.waitForSelector(waitSelector, { timeout: 30000 });
+  }
+
   const html = await page.content();
   await page.close();
   return html;
@@ -56,7 +61,7 @@ async function fetchHtml(browser, url) {
 // --- Scrape a single card page ---
 async function scrapeCardPage(browser, url, tier, attempt = 1) {
   try {
-    const html = await fetchHtml(browser, url);
+    const html = await fetchHtml(url, ".cardData img.img-fluid, .cardData video.img-fluid");
     const $ = cheerio.load(html);
 
     // img vs video condition
@@ -117,7 +122,7 @@ async function scrapeAllPages(existingUrls) {
       let browser;
       try {
         browser = await initBrowser(); // restart browser for each index page
-        const html = await fetchHtml(browser, pageUrl);
+        const html = await fetchHtml(pageUrl, "a[href^='/cards/info/']");
         const $ = cheerio.load(html);
 
         const cardLinks = [
@@ -174,4 +179,5 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
 
