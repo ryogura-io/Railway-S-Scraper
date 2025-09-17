@@ -10,13 +10,13 @@ const MONGO_URI = "mongodb+srv://Ryou:12345@shoob-cards.6bphku9.mongodb.net/?ret
 const DB_NAME = "cards-backup";
 const COLLECTION_NAME = "cards";
 const DATA_FILE = "cards.json"; 
-const TIERS = [6,'S'];
+const TIERS = [6, "S"];
 const PAGE_RANGES = {
   6: [1, 34], 
-  'S': [1, 7]
+  "S": [1, 7]
 };
 
-let db, cardsCollection;
+let db, cardsCollection, browser;
 
 // --- MongoDB Setup ---
 async function connectMongo() {
@@ -29,7 +29,7 @@ async function connectMongo() {
 
 // --- Launch Puppeteer ---
 async function initBrowser() {
-  const browser = await puppeteer.launch({
+  browser = await puppeteer.launch({
     headless: true,
     args: [
       "--no-sandbox",
@@ -37,20 +37,19 @@ async function initBrowser() {
       "--disable-dev-shm-usage",
       "--disable-gpu",
       "--no-zygote",
-      "--single-process"
-    ]
+      "--single-process",
+    ],
   });
   console.log("✅ Headless Chrome started");
-  return browser;
 }
 
 // --- Scrape a page HTML ---
-async function fetchHtml(browser, url, waitSelector = null) {
+async function fetchHtml(url, waitSelector = null) {
   const page = await browser.newPage();
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
+  await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
 
   if (waitSelector) {
-    await page.waitForSelector(waitSelector, { timeout: 30000 });
+    await page.waitForSelector(waitSelector, { timeout: 60000 });
   }
 
   const html = await page.content();
@@ -59,12 +58,11 @@ async function fetchHtml(browser, url, waitSelector = null) {
 }
 
 // --- Scrape a single card page ---
-async function scrapeCardPage(browser, url, tier, attempt = 1) {
+async function scrapeCardPage(url, tier) {
   try {
-    const html = await fetchHtml(browser, url, ".cardData img.img-fluid, .cardData video.img-fluid");
+    const html = await fetchHtml(url, ".cardData img.img-fluid, .cardData video.img-fluid");
     const $ = cheerio.load(html);
 
-    // img vs video condition
     let img;
     if (tier === 6 || tier === "S") {
       img = $(".cardData video.img-fluid").attr("src") || null;
@@ -96,15 +94,7 @@ async function scrapeCardPage(browser, url, tier, attempt = 1) {
 
     return card;
   } catch (err) {
-    if (attempt < 3) {
-      console.log(`🔁 Retry ${attempt} for ${url} due to error: ${err.message}`);
-      // restart browser and try again
-      const newBrowser = await initBrowser();
-      const result = await scrapeCardPage(newBrowser, url, tier, attempt + 1);
-      await newBrowser.close();
-      return result;
-    }
-    console.log(`❌ Failed scraping ${url} after 3 attempts: ${err.message}`);
+    console.log(`❌ Failed scraping ${url}: ${err.message}`);
     return null;
   }
 }
@@ -119,10 +109,8 @@ async function scrapeAllPages(existingUrls) {
       const pageUrl = `https://shoob.gg/cards?page=${i}&tier=${tier}`;
       console.log(`🔹 Scraping index: ${pageUrl}`);
 
-      let browser;
       try {
-        browser = await initBrowser(); // restart browser for each index page
-        const html = await fetchHtml(browser, pageUrl, "a[href^='/cards/info/']");
+        const html = await fetchHtml(pageUrl, "a[href^='/cards/info/']");
         const $ = cheerio.load(html);
 
         const cardLinks = [
@@ -135,21 +123,19 @@ async function scrapeAllPages(existingUrls) {
 
         for (const link of cardLinks) {
           if (!existingUrls.has(link)) {
-            const card = await scrapeCardPage(browser, link, tier);
+            const card = await scrapeCardPage(link, tier);
             if (card) {
               newCards.push(card);
               existingUrls.add(link);
             }
-            await new Promise((r) => setTimeout(r, 1000));
+            await new Promise((r) => setTimeout(r, 1000)); // slow down requests
           }
         }
       } catch (err) {
         console.log(`⚠️ Failed index page ${pageUrl}: ${err.message}`);
-      } finally {
-        if (browser) await browser.close(); // close after each page
       }
 
-      await new Promise((r) => setTimeout(r, 2000));
+      await new Promise((r) => setTimeout(r, 2000)); // wait between pages
     }
   }
 
@@ -177,8 +163,7 @@ app.get("/", (req, res) => {
 app.listen(PORT, "0.0.0.0", async () => {
   console.log(`✅ Keep-alive server running on port ${PORT}`);
   await connectMongo();
+  await initBrowser();
   await runScraper();
+  await browser.close();
 });
-
-
-
