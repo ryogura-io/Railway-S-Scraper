@@ -13,8 +13,8 @@ const DATA_FILE = "cards.json";
 const TIERS = [1,2,3,4]; // tiers to scrape
 const PAGE_RANGES = {
   1: [1, 2], 
-  2: [445, 542], 
-  3: [1, 421], 
+  // 2: [445, 542], 
+  3: [347, 421], 
   4: [1, 339], 
   // 5: [1, 135], 
   // 6: [1, 34], // scrape pages 1 → 30 of tier 2
