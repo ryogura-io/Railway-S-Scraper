@@ -7,18 +7,18 @@ import { MongoClient } from "mongodb";
 
 // --- CONFIG ---
 const MONGO_URI = "mongodb+srv://Ryou:12345@shoob-cards.6bphku9.mongodb.net/?retryWrites=true&w=majority&appName=Shoob-Cards";
-const DB_NAME = "cards-backup";
+const DB_NAME = "shoob";
 const COLLECTION_NAME = "cards";
 const DATA_FILE = "cards.json"; 
-const TIERS = [1,3,4]; // tiers to scrape
+const TIERS = ['S']; // tiers to scrape
 const PAGE_RANGES = {
-  1: [1, 2], 
+  // 1: [1, 2], 
   // 2: [445, 542], 
-  3: [347, 421], 
-  4: [1, 339], 
+  // 3: [347, 421], 
+  // 4: [1, 339], 
   // 5: [1, 135], 
   // 6: [1, 34], // scrape pages 1 → 30 of tier 2
-  // 'S': [1, 7]
+  'S': [1, 7]
 };
 
 let db, cardsCollection;
