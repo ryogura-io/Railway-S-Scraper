@@ -10,7 +10,7 @@ const MONGO_URI = "mongodb+srv://Ryou:12345@shoob-cards.6bphku9.mongodb.net/?ret
 const DB_NAME = "cards-backup";
 const COLLECTION_NAME = "cards";
 const DATA_FILE = "cards.json"; 
-const TIERS = [1,2,3,4]; // tiers to scrape
+const TIERS = [1,3,4]; // tiers to scrape
 const PAGE_RANGES = {
   1: [1, 2], 
   // 2: [445, 542], 
