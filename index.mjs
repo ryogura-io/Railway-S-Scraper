@@ -7,7 +7,7 @@ import { MongoClient } from "mongodb";
 
 // --- CONFIG ---
 const MONGO_URI = "mongodb+srv://Ryou:12345@shoob-cards.6bphku9.mongodb.net/?retryWrites=true&w=majority&appName=Shoob-Cards";
-const DB_NAME = "shoob";
+const DB_NAME = "cards-backup";
 const COLLECTION_NAME = "cards";
 const DATA_FILE = "cards.json"; 
 const TIERS = [5]; // tiers to scrape
