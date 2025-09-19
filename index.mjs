@@ -7,12 +7,12 @@ import { MongoClient } from "mongodb";
 
 // --- CONFIG ---
 const MONGO_URI = "mongodb+srv://Ryou:12345@shoob-cards.6bphku9.mongodb.net/?retryWrites=true&w=majority&appName=Shoob-Cards";
-const DB_NAME = "cards-backup";
-const COLLECTION_NAME = "cards";
+const DB_NAME = "shoob";
+const COLLECTION_NAME = "test";
 const DATA_FILE = "cards.json"; 
 const TIERS = [1]; // tiers to scrape
 const PAGE_RANGES = {
-  1: [453, 794], 
+  1: [330, 331], 
   // 2: [445, 542], 
   // 3: [347, 421], 
   // 4: [1, 339], 
@@ -75,7 +75,10 @@ async function scrapeCardPage(browser, url, tier) {
     const card = {
       url,
       name: $("ol.breadcrumb-new li:last-child span[itemprop='name']").text()?.trim() || null,
-      tier: $("ol.breadcrumb-new li:nth-child(3) span[itemprop='name']").text()?.trim() || null,
+        tier: $("ol.breadcrumb-new li:nth-child(3) span[itemprop='name']")
+    .text()
+    ?.trim()
+    .replace("Tier ", "") || null,
       series: $("ol.breadcrumb-new li:nth-child(4) span[itemprop='name']").text()?.trim() || null,
       img,
       maker: $("p:has(span.padr5)").text()?.replace("Card Maker:", "").trim() || null,
@@ -171,4 +174,5 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
 
