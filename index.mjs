@@ -12,7 +12,7 @@ const COLLECTION_NAME = "cards";
 const DATA_FILE = "cards.json"; 
 const TIERS = [1]; // tiers to scrape
 const PAGE_RANGES = {
-  1: [1, 794], 
+  1: [356, 794], 
   // 2: [445, 542], 
   // 3: [347, 421], 
   // 4: [1, 339], 
