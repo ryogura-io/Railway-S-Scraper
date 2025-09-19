@@ -10,15 +10,15 @@ const MONGO_URI = "mongodb+srv://Ryou:12345@shoob-cards.6bphku9.mongodb.net/?ret
 const DB_NAME = "shoob";
 const COLLECTION_NAME = "test";
 const DATA_FILE = "cards.json"; 
-const TIERS = [1]; // tiers to scrape
+const TIERS = ['S']; // tiers to scrape
 const PAGE_RANGES = {
-  1: [330, 331], 
+  // 1: [330, 794], 
   // 2: [445, 542], 
   // 3: [347, 421], 
   // 4: [1, 339], 
   // 5: [1, 135], 
   // 6: [1, 34], // scrape pages 1 → 30 of tier 2
-  // 'S': [1, 7]
+  'S': [1, 7]
 };
 
 let db, cardsCollection;
@@ -174,5 +174,6 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
 
 
