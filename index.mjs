@@ -70,6 +70,7 @@ async function scrapeCardPage(browser, url) {
         $("ol.breadcrumb-new li:last-child span[itemprop='name']")
           .text()
           ?.trim() || null,
+  event: true,   
       event: EVENT_NAME,
       series:
         $("ol.breadcrumb-new li:nth-child(4) span[itemprop='name']")
@@ -78,8 +79,6 @@ async function scrapeCardPage(browser, url) {
       img,
       maker:
         $("p:has(span.padr5)").text()?.replace("Card Maker:", "").trim() || null,
-        eventName: EVENT_NAME,     // keeps the actual event name
-  event: true,   
     };
 
     if (!card.name || !card.img) {
@@ -173,5 +172,6 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
 
 
