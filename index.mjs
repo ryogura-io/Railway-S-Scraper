@@ -70,7 +70,7 @@ async function scrapeCardPage(browser, url) {
         $("ol.breadcrumb-new li:last-child span[itemprop='name']")
           .text()
           ?.trim() || null,
-  event: true,   
+  isEvent: true,   
       event: EVENT_NAME,
       series:
         $("ol.breadcrumb-new li:nth-child(4) span[itemprop='name']")
@@ -115,14 +115,14 @@ async function scrapeAllPages(existingUrls) {
       const html = await fetchHtml(browser, pageUrl);
       const $ = cheerio.load(html);
 
-      // collect all card links
-      const cardLinks = [
-        ...new Set(
-          $("a[href^='/cards/info/']")
-            .map((_, a) => "https://shoob.gg" + $(a).attr("href"))
-            .get()
-        ),
-      ];
+      // collect all event-card links
+const cardLinks = [
+  ...new Set(
+    $(`a[href^='/card-events/${EVENT_NAME}/']`)
+      .map((_, a) => "https://shoob.gg" + $(a).attr("href"))
+      .get()
+  ),
+];
 
       for (const link of cardLinks) {
         if (!existingUrls.has(link)) {
@@ -172,6 +172,7 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
 
 
 
