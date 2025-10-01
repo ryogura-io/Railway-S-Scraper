@@ -7,10 +7,10 @@ import { MongoClient } from "mongodb";
 
 // --- CONFIG ---
 const MONGO_URI = "mongodb+srv://Ryou:12345@shoob-cards.6bphku9.mongodb.net/?retryWrites=true&w=majority&appName=Shoob-Cards";
-const DB_NAME = "shoob";
-const COLLECTION_NAME = "test";
+const DB_NAME = "cards-backup";
+const COLLECTION_NAME = "cards";
 const START_PAGE = 1;       // first page to scrape
-const END_PAGE = 7;         // last page to scrape
+const END_PAGE = 20;         // last page to scrape
 const DATA_FILE = "cards.json";
 
 let db, cardsCollection;
@@ -171,3 +171,4 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
