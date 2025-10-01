@@ -78,6 +78,8 @@ async function scrapeCardPage(browser, url) {
       img,
       maker:
         $("p:has(span.padr5)").text()?.replace("Card Maker:", "").trim() || null,
+        eventName: EVENT_NAME,     // keeps the actual event name
+  event: true,   
     };
 
     if (!card.name || !card.img) {
@@ -171,3 +173,4 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
