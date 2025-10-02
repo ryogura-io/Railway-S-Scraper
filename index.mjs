@@ -70,7 +70,7 @@ async function scrapeCardPage(browser, url) {
         $("ol.breadcrumb-new li:last-child span[itemprop='name']")
           .text()
           ?.trim() || null,
-              tier: $("ol.breadcrumb-new li:nth-child(3) span[itemprop='name']")
+              tier: $("ol.breadcrumb-new li:nth-child(2) span[itemprop='name']")
     .text()
     ?.trim()
     .replace("Tier ", "") || null,
@@ -176,6 +176,7 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
 
 
 
