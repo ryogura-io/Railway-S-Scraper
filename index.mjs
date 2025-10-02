@@ -12,8 +12,8 @@ const DB_NAME = "cards-backup";
 const EVENT_NAME = "halloween";       // e.g. "summer", "valentine", etc.
 const COLLECTION_NAME = `${EVENT_NAME}_cards`; // separate collection per event
 
-const START_PAGE = 1;      // First page to scrape
-const END_PAGE = 3;        // Last page to scrape
+const START_PAGE = 4;      // First page to scrape
+const END_PAGE = 4;        // Last page to scrape
 
 let db, cardsCollection;
 
@@ -176,6 +176,7 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
 
 
 
