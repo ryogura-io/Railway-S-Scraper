@@ -10,7 +10,7 @@ const DB_NAME = "cards-backup";
 
 // 🔑 Change this to scrape a different event
 const EVENT_NAME = "halloween";       // e.g. "summer", "valentine", etc.
-const COLLECTION_NAME = `${EVENT_NAME}_cards`; // separate collection per event
+const COLLECTION_NAME = `eventCards`; // separate collection per event
 
 const START_PAGE = 4;      // First page to scrape
 const END_PAGE = 4;        // Last page to scrape
@@ -70,7 +70,7 @@ async function scrapeCardPage(browser, url) {
         $("ol.breadcrumb-new li:last-child span[itemprop='name']")
           .text()
           ?.trim() || null,
-              tier: $("ol.breadcrumb-new li:nth-child(2) span[itemprop='name']")
+              tier: $("ol.breadcrumb-new li:nth-child(5) span[itemprop='name']")
     .text()
     ?.trim()
     .replace("Tier ", "") || null,
@@ -160,7 +160,7 @@ async function runScraper() {
   console.log(`Loaded ${existingUrls.size} existing cards from Mongo`);
 
   const newCards = await scrapeAllPages(existingUrls);
-  console.log(`✅ Added ${newCards.length} new cards for event "${EVENT_NAME}"`);
+  console.log(`✅ Added ${newCards.length} new cards for event`);
 }
 
 // === Keep-alive Express server ===
@@ -176,6 +176,7 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
 
 
 
