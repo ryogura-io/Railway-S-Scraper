@@ -10,10 +10,10 @@ const DB_NAME = "cards-backup";
 
 // 🔑 Change this to scrape a different event
 const EVENT_NAME = "halloween";       // e.g. "summer", "valentine", etc.
-const COLLECTION_NAME = `eventCards`; // separate collection per event
+const COLLECTION_NAME = `cards`; // separate collection per event
 
 const START_PAGE = 1;      // First page to scrape
-const END_PAGE = 3;        // Last page to scrape
+const END_PAGE = 10;        // Last page to scrape
 
 let db, cardsCollection;
 
@@ -176,6 +176,7 @@ app.listen(PORT, "0.0.0.0", async () => {
   await connectMongo();
   await runScraper();
 });
+
 
 
 
